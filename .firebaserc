@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "courier-api"
-  }
+    "default": "courier-api",
+    "courier": "courier-ui"
+  },
+  "targets": {},
+  "etags": {}
 }

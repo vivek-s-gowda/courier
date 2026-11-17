@@ -20,6 +20,18 @@ export default function Root() {
   const [currentRoute, setCurrentRoute] = useState(getInitialRoute);
 
   useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (currentRoute === '/app') {
+        document.body.classList.add('app-mode');
+        document.documentElement.classList.add('app-mode');
+      } else {
+        document.body.classList.remove('app-mode');
+        document.documentElement.classList.remove('app-mode');
+      }
+    }
+  }, [currentRoute]);
+
+  useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname;
       if (path === '/app' || path.startsWith('/app/')) {
