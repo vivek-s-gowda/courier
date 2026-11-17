@@ -1,0 +1,179 @@
+name: Deploy Web & Build Desktop Apps
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      deploy_web:
+        description: 'Deploy web app to Firebase Hosting'
+        type: boolean
+        default: true
+      build_desktop:
+        description: 'Build standalone desktop apps'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ============================================================================
+  # 1. DEPLOY WEB APP (Firebase Hosting)
+  # ============================================================================
+  deploy-web:
+    name: Deploy Web App (Firebase)
+    if: github.event_name != 'workflow_dispatch' || inputs.deploy_web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COURIER_API }}
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "🚀 Deploying using Firebase Service Account key..."
+            echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/service-account.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
+            npx firebase-tools deploy --only hosting --non-interactive
+          elif [ -n "$FIREBASE_TOKEN" ]; then
+            echo "🚀 Deploying using FIREBASE_TOKEN..."
+            npx firebase-tools deploy --only hosting --token "$FIREBASE_TOKEN" --non-interactive
+          else
+            echo "::warning::Firebase deployment skipped: Neither FIREBASE_SERVICE_ACCOUNT_COURIER_API nor FIREBASE_TOKEN secret found in repository settings."
+            echo "ℹ️  To enable automatic web deployment on push:"
+            echo "   1. Generate a Firebase token via 'npx firebase login:ci' OR a Service Account JSON in Google Cloud Console."
+            echo "   2. Add it as 'FIREBASE_TOKEN' or 'FIREBASE_SERVICE_ACCOUNT_COURIER_API' in your GitHub repo: Settings -> Secrets and variables -> Actions."
+          fi
+
+      - name: Upload Web Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: courier-web-dist
+          path: dist/
+          retention-days: 7
+
+  # ============================================================================
+  # 2. BUILD STANDALONE DESKTOP APPS (Linux, macOS, Windows)
+  # ============================================================================
+  build-desktop:
+    name: Build ${{ matrix.name }}
+    if: github.event_name != 'workflow_dispatch' || inputs.build_desktop
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            name: Linux (deb, AppImage)
+            command: npm run dist:linux
+            artifact_dir: release
+            upload_name: courier-desktop-linux
+
+          - os: macos-latest
+            platform: mac
+            name: macOS (dmg, zip - Apple Silicon & Intel)
+            command: npm run dist:mac
+            artifact_dir: release
+            upload_name: courier-desktop-macos
+
+          - os: windows-latest
+            platform: windows
+            name: Windows (exe - NSIS & Portable)
+            command: npm run dist:win
+            artifact_dir: release
+            upload_name: courier-desktop-windows
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libarchive-tools desktop-file-utils
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Build frontend distribution
+        run: npm run build
+
+      - name: Package Desktop Application (${{ matrix.name }})
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ${{ matrix.command }}
+
+      - name: Upload ${{ matrix.name }} Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.upload_name }}
+          path: |
+            ${{ matrix.artifact_dir }}/*.deb
+            ${{ matrix.artifact_dir }}/*.AppImage
+            ${{ matrix.artifact_dir }}/*.dmg
+            ${{ matrix.artifact_dir }}/*.zip
+            ${{ matrix.artifact_dir }}/*.exe
+          retention-days: 14
+
+  # ============================================================================
+  # 3. PUBLISH GITHUB RELEASE (Triggered on git tags like v*)
+  # ============================================================================
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [deploy-web, build-desktop]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all built desktop artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Flatten release artifacts directory
+        run: |
+          mkdir -p final-release
+          find release-artifacts -type f \( -name "*.deb" -o -name "*.AppImage" -o -name "*.dmg" -o -name "*.zip" -o -name "*.exe" \) -exec cp {} final-release/ \;
+          echo "Collected release binaries:"
+          ls -lh final-release/
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: final-release/*
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
