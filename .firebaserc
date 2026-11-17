@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "courier-api",
+    "default": "courier-ui",
     "courier": "courier-ui"
   },
   "targets": {},

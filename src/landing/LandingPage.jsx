@@ -25,14 +25,29 @@ import {
 } from 'lucide-react';
 import './landing.css';
 
+const DOWNLOAD_LINKS = {
+  windows: 'https://github.com/vivek-s-gowda/courier/actions/runs/44108719327/artifacts/14340270581',
+  linux: 'https://github.com/vivek-s-gowda/courier/actions/runs/44108719327/artifacts/14339228339',
+  mac: 'https://github.com/vivek-s-gowda/courier/actions/runs/44108719327/artifacts/14340871371'
+};
+
 export default function LandingPage({ onLaunchApp }) {
   // OS Detection
-  const [detectedOs, setDetectedOs] = useState('macOS');
+  const [detectedOs, setDetectedOs] = useState('macOS (Universal)');
+  const [osDownloadUrl, setOsDownloadUrl] = useState(DOWNLOAD_LINKS.mac);
+
   useEffect(() => {
     const platform = window.navigator.userAgent.toLowerCase();
-    if (platform.includes('mac')) setDetectedOs('macOS (Universal)');
-    else if (platform.includes('win')) setDetectedOs('Windows (x64)');
-    else if (platform.includes('linux')) setDetectedOs('Linux (AppImage)');
+    if (platform.includes('mac')) {
+      setDetectedOs('macOS (Universal)');
+      setOsDownloadUrl(DOWNLOAD_LINKS.mac);
+    } else if (platform.includes('win')) {
+      setDetectedOs('Windows (x64)');
+      setOsDownloadUrl(DOWNLOAD_LINKS.windows);
+    } else if (platform.includes('linux')) {
+      setDetectedOs('Linux (AppImage / deb)');
+      setOsDownloadUrl(DOWNLOAD_LINKS.linux);
+    }
   }, []);
 
   // Interactive Hero Mockup States
@@ -217,7 +232,7 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
             <a href="#features" className="nav-link">Features</a>
             <a href="#benchmarks" className="nav-link">Benchmarks</a>
             <a href="#protocols" className="nav-link">Protocols</a>
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="nav-link">Docs</a>
+            <a href="#download" className="nav-link">Downloads</a>
           </nav>
 
           <div className="navbar-actions">
@@ -253,7 +268,13 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
         </p>
 
         <div className="hero-cta-group">
-          <a href="#download" className="btn-hero-primary">
+          <a
+            href={osDownloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-hero-primary"
+            title={`Download Courier standalone client for ${detectedOs}`}
+          >
             <Download size={16} />
             <span>Download for {detectedOs}</span>
           </a>
@@ -667,15 +688,33 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
           </p>
 
           <div className="os-matrix-row">
-            <a href="#download" className="os-download-btn">
+            <a
+              href={DOWNLOAD_LINKS.mac}
+              target="_blank"
+              rel="noreferrer"
+              className="os-download-btn"
+              title="Download Courier for macOS (Universal DMG / ZIP)"
+            >
               <AppleIcon />
               <span>macOS (Universal / Apple Silicon)</span>
             </a>
-            <a href="#download" className="os-download-btn">
+            <a
+              href={DOWNLOAD_LINKS.windows}
+              target="_blank"
+              rel="noreferrer"
+              className="os-download-btn"
+              title="Download Courier for Windows (NSIS / Portable EXE)"
+            >
               <WindowsIcon />
               <span>Windows (x64 / ARM)</span>
             </a>
-            <a href="#download" className="os-download-btn">
+            <a
+              href={DOWNLOAD_LINKS.linux}
+              target="_blank"
+              rel="noreferrer"
+              className="os-download-btn"
+              title="Download Courier for Linux (AppImage / DEB)"
+            >
               <LinuxIcon />
               <span>Linux (AppImage / deb)</span>
             </a>
