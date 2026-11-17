@@ -1,0 +1,70 @@
+[
+  {
+    "id": "mock-get-users",
+    "name": "Get All Mock Users",
+    "method": "GET",
+    "url": "http://localhost:5001/api/mock/users",
+    "headers": [
+      {
+        "key": "Accept",
+        "value": "application/json",
+        "enabled": true
+      }
+    ],
+    "params": [
+      {
+        "key": "limit",
+        "value": "10",
+        "enabled": true
+      }
+    ],
+    "bodyType": "none",
+    "body": "",
+    "createdAt": "2026-11-17T06:50:36.649Z"
+  },
+  {
+    "id": "mock-post-user",
+    "name": "Create New User",
+    "method": "POST",
+    "url": "http://localhost:5001/api/mock/users",
+    "headers": [
+      {
+        "key": "Content-Type",
+        "value": "application/json",
+        "enabled": true
+      }
+    ],
+    "params": [],
+    "bodyType": "json",
+    "body": "{\n  \"name\": \"Alex Mercer\",\n  \"email\": \"alex@example.com\",\n  \"role\": \"Developer\",\n  \"status\": \"active\"\n}",
+    "createdAt": "2026-11-17T06:50:36.658Z"
+  },
+  {
+    "id": "mock-put-user",
+    "name": "Update User (ID: 1)",
+    "method": "PUT",
+    "url": "http://localhost:5001/api/mock/users/1",
+    "headers": [
+      {
+        "key": "Content-Type",
+        "value": "application/json",
+        "enabled": true
+      }
+    ],
+    "params": [],
+    "bodyType": "json",
+    "body": "{\n  \"name\": \"Alex Mercer Jr.\",\n  \"email\": \"alex.jr@example.com\",\n  \"role\": \"Lead Architect\",\n  \"status\": \"active\"\n}",
+    "createdAt": "2026-11-17T06:50:36.658Z"
+  },
+  {
+    "id": "mock-delete-user",
+    "name": "Delete User (ID: 1)",
+    "method": "DELETE",
+    "url": "http://localhost:5001/api/mock/users/1",
+    "headers": [],
+    "params": [],
+    "bodyType": "none",
+    "body": "",
+    "createdAt": "2026-11-17T06:50:36.658Z"
+  }
+]
