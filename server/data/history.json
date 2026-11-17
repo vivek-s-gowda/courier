@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "id": "req_1794927630058_k19sr",
+    "timestamp": "2026-11-17T15:00:30.058Z",
+    "method": "GET",
+    "url": "http://localhost:5173/api/mock/users?limit=10",
+    "status": 200,
+    "statusText": "OK",
+    "duration": 21,
+    "size": 956,
+    "headers": [
+      {
+        "key": "Accept",
+        "value": "application/json",
+        "description": "Accept JSON",
+        "enabled": true
+      }
+    ],
+    "params": [
+      {
+        "key": "limit",
+        "value": "10",
+        "description": "Maximum users to return",
+        "enabled": true
+      }
+    ],
+    "bodyType": "none",
+    "body": "",
+    "responseSnippet": "{Object}"
+  }
+]
