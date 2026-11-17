@@ -48,17 +48,19 @@ export default function Sidebar({
     );
   });
 
+  const baseApiUrl = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:5001';
+
   const mockPresets = [
     {
       name: 'GET All Users',
       method: 'GET',
-      url: 'http://localhost:5001/api/mock/users',
+      url: `${baseApiUrl}/api/mock/users`,
       description: 'Fetch list of all mock users with filtering'
     },
     {
       name: 'POST Create User',
       method: 'POST',
-      url: 'http://localhost:5001/api/mock/users',
+      url: `${baseApiUrl}/api/mock/users`,
       bodyType: 'json',
       body: JSON.stringify({ name: 'Jordan Hayes', email: 'jordan@example.com', role: 'Staff Engineer' }, null, 2),
       description: 'Create user with JSON body payload'
@@ -66,7 +68,7 @@ export default function Sidebar({
     {
       name: 'PUT Update User',
       method: 'PUT',
-      url: 'http://localhost:5001/api/mock/users/1',
+      url: `${baseApiUrl}/api/mock/users/1`,
       bodyType: 'json',
       body: JSON.stringify({ name: 'Emma Watson', role: 'VP of Engineering' }, null, 2),
       description: 'Update existing user ID 1'
@@ -74,7 +76,7 @@ export default function Sidebar({
     {
       name: 'DELETE Remove User',
       method: 'DELETE',
-      url: 'http://localhost:5001/api/mock/users/2',
+      url: `${baseApiUrl}/api/mock/users/2`,
       description: 'Delete user ID 2 from database'
     }
   ];

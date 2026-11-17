@@ -3,36 +3,38 @@ import { Send, Globe, ArrowRight } from 'lucide-react';
 import { getMethodColor } from '../../utils/formatters';
 
 export default function EmptyResponse({ onLoadQuickTest }) {
+  const baseApiUrl = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:5001';
+
   const quickActions = [
     {
       method: 'GET',
       title: 'GET Mock Users',
-      desc: 'http://localhost:5001/api/mock/users',
-      url: 'http://localhost:5001/api/mock/users',
+      desc: `${baseApiUrl}/api/mock/users`,
+      url: `${baseApiUrl}/api/mock/users`,
       bodyType: 'none',
       body: ''
     },
     {
       method: 'POST',
       title: 'POST Create User',
-      desc: 'http://localhost:5001/api/mock/users',
-      url: 'http://localhost:5001/api/mock/users',
+      desc: `${baseApiUrl}/api/mock/users`,
+      url: `${baseApiUrl}/api/mock/users`,
       bodyType: 'json',
       body: JSON.stringify({ name: 'Clara Oswald', email: 'clara@example.com', role: 'Staff Developer' }, null, 2)
     },
     {
       method: 'PUT',
       title: 'PUT Update User (ID: 1)',
-      desc: 'http://localhost:5001/api/mock/users/1',
-      url: 'http://localhost:5001/api/mock/users/1',
+      desc: `${baseApiUrl}/api/mock/users/1`,
+      url: `${baseApiUrl}/api/mock/users/1`,
       bodyType: 'json',
       body: JSON.stringify({ name: 'Emma Watson', role: 'VP of Engineering', status: 'active' }, null, 2)
     },
     {
       method: 'DELETE',
       title: 'DELETE User (ID: 1)',
-      desc: 'http://localhost:5001/api/mock/users/1',
-      url: 'http://localhost:5001/api/mock/users/1',
+      desc: `${baseApiUrl}/api/mock/users/1`,
+      url: `${baseApiUrl}/api/mock/users/1`,
       bodyType: 'none',
       body: ''
     }

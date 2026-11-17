@@ -67,7 +67,8 @@
     ],
     "asar": true,
     "asarUnpack": [
-      "server/**/*"
+      "server/**/*",
+      "dist/**/*"
     ],
     "mac": {
       "icon": "electron/assets/icon.png",

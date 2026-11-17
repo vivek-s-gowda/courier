@@ -570,13 +570,46 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve frontend dist if built
-const distDir = process.env.COURIER_DIST_DIR || path.join(__dirname, '../dist');
-if (fs.existsSync(distDir)) {
+function resolveDistDir() {
+  if (process.env.COURIER_DIST_DIR && fs.existsSync(process.env.COURIER_DIST_DIR)) {
+    return process.env.COURIER_DIST_DIR;
+  }
+  // In dev or unpacked Electron layout
+  const relativeDist = path.join(__dirname, '../dist');
+  if (fs.existsSync(relativeDist)) {
+    return relativeDist;
+  }
+  // In case server is at resources/app.asar.unpacked/server and dist is unpacked at resources/app.asar.unpacked/dist
+  const unpackedSibling = path.join(__dirname, '../../app.asar.unpacked/dist');
+  if (fs.existsSync(unpackedSibling)) {
+    return unpackedSibling;
+  }
+  // In case dist is located directly in resources/dist
+  const resourcesDist = path.join(__dirname, '../../dist');
+  if (fs.existsSync(resourcesDist)) {
+    return resourcesDist;
+  }
+  return null;
+}
+
+const distDir = resolveDistDir();
+if (distDir) {
+  console.log(`[Courier Server] Serving static frontend from: ${distDir}`);
   app.use(express.static(distDir));
+
+  // Explicit endpoints for web SPA and Electron window
+  app.get(['/', '/app'], (req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'));
+  });
+
+  // Client-side routing catch-all
   app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
     if (req.path.startsWith('/api')) return next();
     res.sendFile(path.join(distDir, 'index.html'));
   });
+} else {
+  console.warn('[Courier Server] Warning: Frontend dist directory could not be located.');
 }
 
 const server = app.listen(PORT, () => {

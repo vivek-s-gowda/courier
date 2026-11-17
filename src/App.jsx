@@ -9,9 +9,11 @@ import ResponsePanel from './components/ResponsePanel/ResponsePanel';
 import SaveRequestModal from './components/SaveRequestModal';
 
 export default function App() {
+  const defaultOrigin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:5001';
+
   // Main Request States
   const [method, setMethod] = useState('GET');
-  const [url, setUrl] = useState('http://localhost:5001/api/mock/users');
+  const [url, setUrl] = useState(`${defaultOrigin}/api/mock/users`);
   const [requestName, setRequestName] = useState('Get Mock Users');
   const [selectedId, setSelectedId] = useState(null);
 
@@ -241,7 +243,7 @@ export default function App() {
   const handleNewRequest = () => {
     setSelectedId(null);
     setMethod('GET');
-    setUrl('http://localhost:5001/api/mock/users');
+    setUrl(`${defaultOrigin}/api/mock/users`);
     setRequestName('Untitled Request');
     setParams([{ key: '', value: '', description: '', enabled: true }]);
     setHeaders([{ key: 'Accept', value: 'application/json', description: '', enabled: true }, { key: '', value: '', description: '', enabled: true }]);

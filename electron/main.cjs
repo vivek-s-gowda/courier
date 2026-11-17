@@ -2,10 +2,11 @@ const { app, BrowserWindow, Menu, shell, ipcMain, dialog } = require('electron')
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const net = require('net');
 const { fork } = require('child_process');
 
-const PORT = process.env.PORT || 5001;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+let activePort = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
 
 let mainWindow = null;
 let serverProcess = null;
@@ -24,10 +25,23 @@ app.on('second-instance', () => {
   }
 });
 
-// Check if backend HTTP server is responding
-function checkServerReady(port) {
+// Test whether a port is free to bind
+function isPortAvailable(port) {
   return new Promise((resolve) => {
-    const req = http.get(`http://localhost:${port}/api/health`, (res) => {
+    const tester = net.createServer();
+    tester.once('error', () => resolve(false));
+    tester.once('listening', () => {
+      tester.close(() => resolve(true));
+    });
+    tester.listen(port, '127.0.0.1');
+  });
+}
+
+// Check if backend HTTP server is responding and correctly serving /app
+function checkAppReady(port) {
+  return new Promise((resolve) => {
+    const req = http.get(`http://localhost:${port}/app`, (res) => {
+      // Must return HTTP 200 (HTML page), not 404 Cannot GET /app
       resolve(res.statusCode === 200);
     });
     req.on('error', () => resolve(false));
@@ -39,13 +53,37 @@ function checkServerReady(port) {
 }
 
 // Poll until backend server is ready
-async function waitForServer(port, maxRetries = 50, interval = 200) {
+async function waitForServer(port, maxRetries = 60, interval = 200) {
   for (let i = 0; i < maxRetries; i++) {
-    const ready = await checkServerReady(port);
+    const ready = await checkAppReady(port);
     if (ready) return true;
     await new Promise((r) => setTimeout(r, interval));
   }
   return false;
+}
+
+// Select an available port, or reuse existing if compatible
+async function findAvailablePort(preferredPort = 5001) {
+  // If an existing server already on preferredPort correctly serves /app, reuse it!
+  const isCompatible = await checkAppReady(preferredPort);
+  if (isCompatible) {
+    return { port: preferredPort, reuse: true };
+  }
+
+  // If preferredPort is completely free, use it
+  const isFree = await isPortAvailable(preferredPort);
+  if (isFree) {
+    return { port: preferredPort, reuse: false };
+  }
+
+  // If preferredPort is occupied by an incompatible process, find the next free port
+  for (let p = preferredPort + 1; p < preferredPort + 50; p++) {
+    if (await isPortAvailable(p)) {
+      return { port: p, reuse: false };
+    }
+  }
+
+  return { port: preferredPort, reuse: false };
 }
 
 // Locate server script across dev and packaged environments
@@ -63,27 +101,46 @@ function getServerScriptPath() {
   return localPath;
 }
 
+// Resolve static dist directory
+function getDistDirPath() {
+  if (!app.isPackaged) {
+    return path.join(__dirname, '../dist');
+  }
+
+  // When packaged with asarUnpack, dist is in resources/app.asar.unpacked/dist
+  const unpackedDist = path.join(process.resourcesPath, 'app.asar.unpacked', 'dist');
+  if (fs.existsSync(unpackedDist)) return unpackedDist;
+
+  // Direct sibling in resources/dist
+  const resourceDist = path.join(process.resourcesPath, 'dist');
+  if (fs.existsSync(resourceDist)) return resourceDist;
+
+  return path.join(app.getAppPath(), 'dist');
+}
+
 // Ensure the Express backend engine is running
 async function ensureBackendServer() {
-  const alreadyRunning = await checkServerReady(PORT);
-  if (alreadyRunning) {
-    console.log(`[Courier Electron] Backend already active at http://localhost:${PORT}`);
+  const preferredPort = process.env.PORT ? parseInt(process.env.PORT, 10) : 5001;
+  const { port, reuse } = await findAvailablePort(preferredPort);
+  activePort = port;
+
+  if (reuse) {
+    console.log(`[Courier Electron] Compatible backend already active at http://localhost:${activePort}`);
     return;
   }
 
   const serverScript = getServerScriptPath();
   const userDataDir = path.join(app.getPath('userData'), 'data');
-  const distDir = app.isPackaged
-    ? path.join(app.getAppPath(), 'dist')
-    : path.join(__dirname, '../dist');
+  const distDir = getDistDirPath();
 
-  console.log(`[Courier Electron] Starting backend server: ${serverScript}`);
+  console.log(`[Courier Electron] Starting backend server: ${serverScript} on port ${activePort}`);
+  console.log(`[Courier Electron] Serving frontend from: ${distDir}`);
   console.log(`[Courier Electron] Storage directory: ${userDataDir}`);
 
   serverProcess = fork(serverScript, [], {
     env: {
       ...process.env,
-      PORT: String(PORT),
+      PORT: String(activePort),
       COURIER_DATA_DIR: userDataDir,
       COURIER_DIST_DIR: distDir,
       ELECTRON_RUN_AS_NODE: '1'
@@ -108,9 +165,9 @@ async function ensureBackendServer() {
     serverProcess = null;
   });
 
-  const ready = await waitForServer(PORT);
+  const ready = await waitForServer(activePort);
   if (!ready) {
-    console.error('[Courier Electron] Warning: Backend server took longer than expected to report healthy.');
+    console.error(`[Courier Electron] Warning: Backend server on port ${activePort} took longer than expected to report healthy.`);
   }
 }
 
@@ -260,7 +317,7 @@ function createMainWindow() {
   });
 
   const devUrl = 'http://localhost:5173/app';
-  const prodUrl = `http://localhost:${PORT}/app`;
+  const prodUrl = `http://localhost:${activePort}/app`;
 
   if (isDev) {
     // Try Vite dev server first, fall back to backend URL
@@ -276,6 +333,14 @@ function createMainWindow() {
     console.log(`[Courier Electron] Loading Production App Server: ${prodUrl}`);
     mainWindow.loadURL(prodUrl);
   }
+
+  // Fallback in dev if Vite server fails to load
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    if (isDev && validatedURL && validatedURL.includes('5173')) {
+      console.log(`[Courier Electron] Vite dev server not available, falling back to: ${prodUrl}`);
+      mainWindow.loadURL(prodUrl);
+    }
+  });
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
