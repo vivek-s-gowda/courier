@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Send,
   Download,
-  Terminal,
   Check,
-  Copy,
   Zap,
   GitBranch,
   Gauge,
@@ -37,14 +35,6 @@ export default function LandingPage({ onLaunchApp }) {
     else if (platform.includes('win')) setDetectedOs('Windows (x64)');
     else if (platform.includes('linux')) setDetectedOs('Linux (AppImage)');
   }, []);
-
-  // Terminal Copy State
-  const [copiedBrew, setCopiedBrew] = useState(false);
-  const handleCopyBrew = () => {
-    navigator.clipboard.writeText('brew install --cask courier-api');
-    setCopiedBrew(true);
-    setTimeout(() => setCopiedBrew(false), 2200);
-  };
 
   // Interactive Hero Mockup States
   const heroMockupEndpoints = [
@@ -277,16 +267,6 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
             <span>Open in Browser (/app)</span>
             <ExternalLink size={15} />
           </button>
-
-          <div className="terminal-copy-pill" onClick={handleCopyBrew} title="Click to copy command">
-            <Terminal size={13} color="var(--lp-violet)" />
-            <span>brew install --cask courier-api</span>
-            {copiedBrew ? (
-              <Check size={13} color="#10b981" />
-            ) : (
-              <Copy size={13} color="#71717a" />
-            )}
-          </div>
         </div>
 
         {/* Interactive 3D Hero Mockup */}

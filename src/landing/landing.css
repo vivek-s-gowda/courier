@@ -314,26 +314,6 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.terminal-copy-pill {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-border);
-  padding: 9px 16px;
-  border-radius: 8px;
-  font-family: var(--lp-font-mono);
-  font-size: 12.5px;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.terminal-copy-pill:hover {
-  border-color: var(--lp-violet);
-  color: #ffffff;
-}
-
 /* --------------------------------------------------------------------------
    INTERACTIVE HERO PREVIEW FRAME (3D TILT MOCKUP)
    -------------------------------------------------------------------------- */
