@@ -15,7 +15,9 @@
     "electron:preview": "npm run build && concurrently -n \"SERVER,ELECTRON\" -c \"red,magenta\" \"node server/server.js\" \"wait-on http://localhost:5001/api/health && npx electron .\"",
     "pack": "npm run build && npx electron-builder --dir",
     "dist": "npm run build && npx electron-builder",
-    "dist:linux": "npm run build && npx electron-builder --linux",
+    "dist:linux": "npm run build && npx electron-builder --linux AppImage deb",
+    "dist:linux:deb": "npm run build && npx electron-builder --linux deb",
+    "dist:linux:appimage": "npm run build && npx electron-builder --linux AppImage",
     "dist:mac": "npm run build && npx electron-builder --mac",
     "dist:mac:arm64": "npm run build && npx electron-builder --mac --arm64",
     "dist:mac:universal": "npm run build && npx electron-builder --mac --universal",
@@ -33,7 +35,7 @@
     "electron",
     "desktop-app"
   ],
-  "author": "",
+  "author": "Courier Team <dev@courier.dev>",
   "license": "MIT",
   "type": "module",
   "dependencies": {
@@ -46,7 +48,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^6.3.0",
     "concurrently": "^10.0.4",
-    "electron": "^35.0.0",
+    "electron": "^35.7.5",
     "electron-builder": "^25.1.8",
     "vite": "^8.3.8",
     "wait-on": "^8.0.4"
@@ -102,7 +104,12 @@
         "AppImage",
         "deb"
       ],
+      "maintainer": "Courier Team <dev@courier.dev>",
       "category": "Development"
+    },
+    "deb": {
+      "priority": "optional",
+      "packageCategory": "devel"
     }
   }
 }
