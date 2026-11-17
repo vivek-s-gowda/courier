@@ -20,7 +20,9 @@
     "dist:mac:arm64": "npm run build && electron-builder --mac --arm64",
     "dist:mac:universal": "npm run build && electron-builder --mac --universal",
     "dist:mac:x64": "npm run build && electron-builder --mac --x64",
-    "dist:win": "npm run build && electron-builder --win"
+    "dist:win": "npm run build && electron-builder --win",
+    "deploy:firebase": "npm run build && firebase deploy --only hosting",
+    "firebase:serve": "npm run build && firebase serve --only hosting"
   },
   "keywords": [
     "postman",

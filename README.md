@@ -97,6 +97,25 @@ Open your browser at:
 
 ---
 
+## 🔥 Deploy to Firebase Hosting
+
+You can deploy the landing page and online web application directly to Firebase Hosting with automated single-page application (SPA) routing for `/app`:
+
+```bash
+# 1. Login to Firebase CLI (if not already logged in)
+npx firebase login
+
+# 2. Build and deploy to Firebase Hosting
+npm run deploy:firebase
+```
+
+To test the Firebase production preview locally before deploying:
+```bash
+npm run firebase:serve
+```
+
+---
+
 ## 🖥️ Standalone Desktop App (Electron)
 
 Courier can run as a native desktop application with full OS integration, dedicated menus, keyboard shortcuts (`Cmd/Ctrl + N`, `Cmd/Ctrl + Enter`), and permanent local data persistence.

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Send,
   Download,
-  Check,
   Zap,
   GitBranch,
   Gauge,
@@ -196,9 +195,6 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
     }
   };
 
-  // Pricing Annual Toggle
-  const [isAnnual, setIsAnnual] = useState(true);
-
   return (
     <div className="landing-container">
       {/* Background Ambient Glows */}
@@ -221,7 +217,6 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
             <a href="#features" className="nav-link">Features</a>
             <a href="#benchmarks" className="nav-link">Benchmarks</a>
             <a href="#protocols" className="nav-link">Protocols</a>
-            <a href="#pricing" className="nav-link">Pricing</a>
             <a href="https://github.com" target="_blank" rel="noreferrer" className="nav-link">Docs</a>
           </nav>
 
@@ -661,107 +656,7 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
       </section>
 
       {/* --------------------------------------------------------------------
-          F. TRANSPARENT PRICING
-          -------------------------------------------------------------------- */}
-      <section className="pricing-section" id="pricing">
-        <div className="section-header">
-          <div className="section-eyebrow">Fair &amp; Transparent</div>
-          <h2 className="section-title">Open-Source Core, Zero Paywalls</h2>
-          <p className="section-subtitle">
-            Courier is free forever for developers. No limits on requests, history, or environments.
-          </p>
-        </div>
-
-        <div className="pricing-toggle-wrapper">
-          <span>Monthly billing</span>
-          <div
-            className={`pricing-toggle ${isAnnual ? 'active' : ''}`}
-            onClick={() => setIsAnnual(!isAnnual)}
-          >
-            <div className="pricing-toggle-knob" />
-          </div>
-          <span>Annual billing</span>
-          <span style={{ background: 'rgba(139, 92, 246, 0.2)', color: 'var(--lp-violet)', padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
-            Save 20%
-          </span>
-        </div>
-
-        <div className="pricing-cards-grid">
-          {/* Community Plan */}
-          <div className="pricing-card">
-            <div className="pricing-tag">Community Edition</div>
-            <div className="pricing-price">$0</div>
-            <p style={{ fontSize: 13, color: 'var(--lp-text-muted)' }}>Free forever for individual developers</p>
-
-            <ul className="pricing-features-list">
-              <li className="pricing-feature-item">
-                <Check size={16} color="#10b981" />
-                <span>Unlimited local collections &amp; history</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="#10b981" />
-                <span>Git-native syncing via your filesystem</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="#10b981" />
-                <span>REST, GraphQL, WebSockets, &amp; gRPC</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="#10b981" />
-                <span>Built-in Mock Server &amp; Proxy engine</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="#10b981" />
-                <span>Zero telemetry &amp; 100% offline functionality</span>
-              </li>
-            </ul>
-
-            <button onClick={onLaunchApp} className="btn-pricing btn-pricing-outline">
-              Open Web App (/app)
-            </button>
-          </div>
-
-          {/* Team Cloud Plan */}
-          <div className="pricing-card featured">
-            <div className="pricing-tag">Team Enterprise</div>
-            <div className="pricing-price">
-              {isAnnual ? '$10' : '$12'}
-              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--lp-text-muted)' }}> / user / mo</span>
-            </div>
-            <p style={{ fontSize: 13, color: 'var(--lp-text-muted)' }}>For engineering teams needing managed sync</p>
-
-            <ul className="pricing-features-list">
-              <li className="pricing-feature-item">
-                <Check size={16} color="var(--lp-violet)" />
-                <span style={{ color: '#fff' }}>Everything in Community, plus:</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="var(--lp-violet)" />
-                <span>End-to-end encrypted team vault sync</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="var(--lp-violet)" />
-                <span>Role-based access control (RBAC)</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="var(--lp-violet)" />
-                <span>SAML SSO &amp; SCIM provisioning</span>
-              </li>
-              <li className="pricing-feature-item">
-                <Check size={16} color="var(--lp-violet)" />
-                <span>Priority 24/7 engineering support</span>
-              </li>
-            </ul>
-
-            <a href="#download" className="btn-pricing btn-pricing-filled">
-              Start 14-Day Free Trial
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* --------------------------------------------------------------------
-          G. FINAL CTA & DOWNLOAD MATRIX
+          F. FINAL CTA & DOWNLOAD MATRIX
           -------------------------------------------------------------------- */}
       <section className="final-cta-section" id="download">
         <div className="final-cta-card">
@@ -815,7 +710,6 @@ data: { "server_epoch": 1794920780, "health": "100%" }`
               <li><button onClick={onLaunchApp} style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit', cursor: 'pointer' }} className="footer-link">Online App (/app)</button></li>
               <li><a href="#download" className="footer-link">Desktop Client</a></li>
               <li><a href="#benchmarks" className="footer-link">Performance Benchmarks</a></li>
-              <li><a href="#pricing" className="footer-link">Pricing</a></li>
             </ul>
           </div>
 
