@@ -1,17 +1,36 @@
 {
   "name": "courier",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server/server.js",
+  "version": "1.0.0-alpha.1",
+  "description": "Postman-style API Testing Platform",
+  "main": "electron/main.cjs",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"red,cyan\" \"node server/server.js\" \"vite\"",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"red,cyan\" \"node server/server.js\" \"vite --configLoader native\"",
     "dev:server": "node server/server.js",
-    "dev:client": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev:client": "vite --configLoader native",
+    "build": "vite build --configLoader native",
+    "preview": "vite preview --configLoader native",
+    "electron": "electron .",
+    "electron:dev": "concurrently -n \"SERVER,CLIENT,ELECTRON\" -c \"red,cyan,magenta\" \"node server/server.js\" \"vite --configLoader native\" \"wait-on http://localhost:5173 && wait-on http://localhost:5001/api/health && electron .\"",
+    "electron:preview": "npm run build && concurrently -n \"SERVER,ELECTRON\" -c \"red,magenta\" \"node server/server.js\" \"wait-on http://localhost:5001/api/health && electron .\"",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64",
+    "dist:mac:universal": "npm run build && electron-builder --mac --universal",
+    "dist:mac:x64": "npm run build && electron-builder --mac --x64",
+    "dist:win": "npm run build && electron-builder --win"
   },
-  "keywords": ["postman", "api-tester", "rest-client", "react", "express"],
+  "keywords": [
+    "postman",
+    "api-tester",
+    "rest-client",
+    "react",
+    "express",
+    "electron",
+    "desktop-app"
+  ],
   "author": "",
   "license": "MIT",
   "type": "module",
@@ -25,6 +44,63 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^6.3.0",
     "concurrently": "^10.0.4",
-    "vite": "^8.3.8"
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8",
+    "vite": "^8.3.8",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.courier.app",
+    "productName": "Courier",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "server/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "server/**/*"
+    ],
+    "mac": {
+      "icon": "electron/assets/icon.png",
+      "category": "public.app-category.developer-tools",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64",
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64",
+            "universal"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "icon": "electron/assets/icon.png",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "icon": "electron/assets/icon.png",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development"
+    }
   }
 }

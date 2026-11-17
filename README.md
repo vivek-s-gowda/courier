@@ -91,7 +91,41 @@ npm run build
 npm start
 ```
 
-Open your browser at **`http://localhost:5001`**.
+Open your browser at:
+* **`http://localhost:5001/`**: High-converting developer landing page
+* **`http://localhost:5001/app`**: Full Courier API testing application (/app route)
+
+---
+
+## 🖥️ Standalone Desktop App (Electron)
+
+Courier can run as a native desktop application with full OS integration, dedicated menus, keyboard shortcuts (`Cmd/Ctrl + N`, `Cmd/Ctrl + Enter`), and permanent local data persistence.
+
+### Run in Desktop Development Mode
+Runs the backend, Vite hot-reload frontend, and Electron desktop shell together:
+```bash
+npm run electron:dev
+```
+
+### Preview Built Desktop App
+```bash
+npm run electron:preview
+```
+
+### Build Distributables / Standalone Installers
+Packages standalone executables and installers into the `release/` folder using `electron-builder`:
+```bash
+# Package for the current OS
+npm run dist
+
+# Or package for specific operating systems:
+npm run dist:linux          # Linux AppImage & .deb
+npm run dist:mac            # macOS (current Mac architecture)
+npm run dist:mac:arm64      # Apple Silicon native DMG (M1, M2, M3, M4)
+npm run dist:mac:universal  # Universal macOS binary (single app for both Apple Silicon & Intel)
+npm run dist:mac:x64        # Intel Mac DMG
+npm run dist:win            # Windows NSIS Installer & Portable
+```
 
 ---
 
@@ -115,6 +149,10 @@ You can test all 4 HTTP methods immediately using the built-in mock engine:
 
 ```
 Courier/
+├── electron/
+│   ├── main.cjs             # Electron main process (lifecycle, server supervisor, window, menus)
+│   ├── preload.cjs          # Secure context bridge & IPC channels
+│   └── assets/              # Desktop app icons (icon.png, icon.svg)
 ├── server/
 │   ├── server.js            # Express server (Proxy executor, Mock APIs, History CRUD)
 │   └── data/

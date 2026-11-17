@@ -251,6 +251,27 @@ export default function App() {
     showToast('New request created');
   };
 
+  // Electron desktop menu integration
+  const handleSendRef = useRef(handleSend);
+  handleSendRef.current = handleSend;
+  const handleNewRequestRef = useRef(handleNewRequest);
+  handleNewRequestRef.current = handleNewRequest;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.courierDesktop) {
+      const unsubNew = window.courierDesktop.onNewRequest?.(() => {
+        handleNewRequestRef.current?.();
+      });
+      const unsubSend = window.courierDesktop.onSendRequest?.(() => {
+        handleSendRef.current?.();
+      });
+      return () => {
+        if (unsubNew) unsubNew();
+        if (unsubSend) unsubSend();
+      };
+    }
+  }, []);
+
   // Delete Single History Item
   const handleDeleteHistoryItem = async (id) => {
     try {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Zap, 
+  Send, 
   Plus, 
   Search, 
   Trash2, 
@@ -86,7 +86,7 @@ export default function Sidebar({
         <div className="brand-wrapper">
           <div className="brand-logo">
             <div className="brand-icon-box">
-              <Zap size={20} strokeWidth={2.5} />
+              <Send size={18} strokeWidth={2.5} style={{ transform: 'translateX(1px)' }} />
             </div>
             <div>
               <div className="brand-title">

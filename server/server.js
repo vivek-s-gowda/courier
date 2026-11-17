@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Ensure data folder exists
-const dataDir = path.join(__dirname, 'data');
+const dataDir = process.env.COURIER_DATA_DIR || path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -570,7 +570,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve frontend dist if built
-const distDir = path.join(__dirname, '../dist');
+const distDir = process.env.COURIER_DIST_DIR || path.join(__dirname, '../dist');
 if (fs.existsSync(distDir)) {
   app.use(express.static(distDir));
   app.use((req, res, next) => {
@@ -579,6 +579,24 @@ if (fs.existsSync(distDir)) {
   });
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Courier Backend Server running on http://localhost:${PORT}`);
+  if (process.send) {
+    process.send({ status: 'ready', port: PORT });
+  }
+});
+
+// Graceful shutdown handling for standalone / Electron wrappers
+process.on('message', (msg) => {
+  if (msg === 'shutdown') {
+    server.close(() => {
+      process.exit(0);
+    });
+  }
+});
+
+process.on('SIGTERM', () => {
+  server.close(() => {
+    process.exit(0);
+  });
 });
